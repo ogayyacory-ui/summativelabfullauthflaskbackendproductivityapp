@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Flask-Bcrypt
+Flask-Migrate
+Flask-RESTful
+Flask-JWT-Extended    # Optional: use if choosing JWT auth
+Flask-CORS            # Required for frontend integration
