@@ -26,4 +26,43 @@ class RegisterResource(Resource):
         db.session.add(new_user)
         db.session.commit()
 
-        return {'message': 'User registered successfully'}, 201
+# jwt_token = create_access_token(identity=new_user.id)
+        access_token = create_access_token(identity=new_user.id)
+        return {'message': 'User registered successfully',
+                 'access_token': access_token,
+                    'user': new_user.to_dict()
+                 }, 201
+
+
+
+class LoginResource(Resource):
+    def post(self):
+        data = request.get_json() or {}
+        username_or_email = data.get('username') or data.get('email')
+        password = data.get('password')
+
+        if not username_or_email or not password:
+            return {"error": "Credentials and password required"}, 400
+
+        user = User.query.filter(
+            (User.username == username_or_email) | (User.email == username_or_email)
+        ).first()
+
+        if not user or not user.check_password(password):
+            return {"error": "Invalid username or password"}, 401
+
+        access_token = create_access_token(identity=str(user.id))
+        return {
+            "access_token": access_token,
+            "user": user.to_dict()
+        }, 200
+
+
+class MeResource(Resource):
+    @jwt_required()
+    def get(self):
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+        if not user:
+            return {"error": "User not found"}, 404
+        return user.to_dict(), 200
