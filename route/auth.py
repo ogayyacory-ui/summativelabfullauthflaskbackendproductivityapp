@@ -34,20 +34,20 @@ class RegisterResource(Resource):
                  }, 201
 
 
-
+# Resource for user login
 class LoginResource(Resource):
     def post(self):
         data = request.get_json() or {}
         username_or_email = data.get('username') or data.get('email')
         password = data.get('password')
-
+# Check if the username/email and password are provided
         if not username_or_email or not password:
             return {"error": "Credentials and password required"}, 400
 
         user = User.query.filter(
             (User.username == username_or_email) | (User.email == username_or_email)
         ).first()
-
+# Check if the user exists and the password is correct
         if not user or not user.check_password(password):
             return {"error": "Invalid username or password"}, 401
 
@@ -57,7 +57,7 @@ class LoginResource(Resource):
             "user": user.to_dict()
         }, 200
 
-
+# Resource for retrieving the current user's information
 class MeResource(Resource):
     @jwt_required()
     def get(self):
