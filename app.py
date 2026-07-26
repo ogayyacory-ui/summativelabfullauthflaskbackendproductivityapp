@@ -24,7 +24,12 @@ def create_app():
     api.add_resource(NoteListResource, '/notes')
     api.add_resource(NoteDetailResource, '/notes/<int:note_id>')
 
+    @app.route('/')
+    def home():
+        return {"message": "Welcome to the Productivity App API! Use /register, /login, /me, and /notes"}
+
     return app
+
 
 app = create_app()
 

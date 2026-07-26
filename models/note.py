@@ -1,4 +1,4 @@
-from extenstions import db
+from extensions import db
 from datetime import datetime
 
 class Note(db.Model):
@@ -8,6 +8,10 @@ class Note(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+    # Establish relationship with User model
+    user = db.relationship('User', back_populates='notes')
 
     def to_dict(self):
         return {

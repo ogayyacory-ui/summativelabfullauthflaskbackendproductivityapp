@@ -1,4 +1,4 @@
-from extenstions import db, bcrypt
+from extensions import db, bcrypt
 
 # User model for the database
 class User(db.Model):

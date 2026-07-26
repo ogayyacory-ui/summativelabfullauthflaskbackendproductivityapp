@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from extenstions import db
+from extensions import db
 from models.user import User
 
 class RegisterResource(Resource):
