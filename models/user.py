@@ -7,6 +7,9 @@ class User(db.Model):
     email = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
+    #one-to-many relationship with Note model
+    notes = db.relationship('Note', back_populates='user', lazy=True)
+
     def __init__(self, username, email, password=None):
         self.username = username
         self.email = email
