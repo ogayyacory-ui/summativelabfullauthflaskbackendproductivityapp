@@ -1,171 +1,51 @@
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from extensions import db
-from models.note import Note
-
-# Resource for handling notes
-class NoteListResource(Resource):
-    @jwt_required()
-    def get(self):
-        """GET /notes?page=1&per_page=10 (Paginated)"""
-        current_user_id = int(get_jwt_identity())
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
-
-        # Retrieve ONLY notes belonging to current authenticated user
-        pagination = Note.query.filter_by(user_id=current_user_id)\
-                               .order_by(Note.created_at.desc())\
-                               .paginate(page=page, per_page=per_page, error_out=False)
-
-        return {
-            "notes": [note.to_dict() for note in pagination.items],
-            "total": pagination.total,
-            "pages": pagination.pages,
-            "current_page": pagination.page,
-            "per_page": pagination.per_page
-        }, 200
-
-    @jwt_required()
-    def post(self):
-        """POST /notes"""
-        current_user_id = int(get_jwt_identity())
-        data = request.get_json() or {}
-
-        title = data.get('title')
-        content = data.get('content')
-
-        if not title or not content:
-            return {"error": "Title and content are required"}, 400
-
-        new_note = Note(
-            title=title,
-            content=content,
-            user_id=current_user_id
-        )
-        db.session.add(new_note)
-        db.session.commit()
-
-        return new_note.to_dict(), 201
-
-# Resource for handling individual note operations
-class NoteDetailResource(Resource):
-    @jwt_required()
-    def get(self, note_id):
-        """GET /notes/<id>"""
-        current_user_id = int(get_jwt_identity())
-        note = Note.query.get(note_id)
-
-        if not note:
-            return {"error": "Note not found"}, 404
-
-        # Route protection & authorization check
-        if note.user_id != current_user_id:
-            return {"error": "Unauthorized access to this resource"}, 403
-
-        return note.to_dict(), 200
-
-    @jwt_required()
-    def patch(self, note_id):
-        """PATCH /notes/<id>"""
-        current_user_id = int(get_jwt_identity())
-        note = Note.query.get(note_id)
-
-        if not note:
-            return {"error": "Note not found"}, 404
-
-        if note.user_id != current_user_id:
-            return {"error": "Unauthorized modification attempt"}, 403
-
-        data = request.get_json() or {}
-        if 'title' in data:
-            note.title = data['title']
-        if 'content' in data:
-            note.content = data['content']
-
-        db.session.commit()
-        return note.to_dict(), 200
-
-    @jwt_required()
-    def delete(self, note_id):
-        """DELETE /notes/<id>"""
-        current_user_id = int(get_jwt_identity())
-        note = Note.query.get(note_id)
-
-        if not note:
-            return {"error": "Note not found"}, 404
-
-        if note.user_id != current_user_id:
-            return {"error": "Unauthorized deletion attempt"}, 403
-
-        db.session.delete(note)
-        db.session.commit()
-        return {"message": "Note deleted successfully"}, 200
-from flask import Request
-from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from extensions import db
+from extenstions import db
 from models.user import User
 
-# Resource for user registration
 class RegisterResource(Resource):
     def post(self):
-        data = Request.get_json()
+        data = request.get_json() or {}
         username = data.get('username')
-        password = data.get('password')
         email = data.get('email')
-# Check if the username, password, and email are provided
-        if not username or not password or not email:
-            return {'message': 'Username, email, and password are required'}, 400
-# Check if the username or email already exists in the database
-        if User.query.filter_by(username=username).first():
-            return {'message': 'Username already exists'}, 400
+        password = data.get('password')
 
-        if User.query.filter_by(email=email).first():
-            return {'message': 'Email already exists'}, 400
+        if not username or not email or not password:
+            return {"error": "Username, email, and password are required"}, 400
 
-        new_user = User(username=username, email=email)
-        new_user.set_password(password)
-        db.session.add(new_user)
+        if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+            return {"error": "Username or email already registered"}, 409
+
+        user = User(username=username, email=email, password=password)
+        db.session.add(user)
         db.session.commit()
 
-# jwt_token = create_access_token(identity=new_user.id)
-        access_token = create_access_token(identity=new_user.id)
-        return {'message': 'User registered successfully',
-                 'access_token': access_token,
-                    'user': new_user.to_dict()
-                 }, 201
+        return user.to_dict(), 201
 
-
-# Resource for user login
 class LoginResource(Resource):
     def post(self):
         data = request.get_json() or {}
-        username_or_email = data.get('username') or data.get('email')
+        email = data.get('email')
         password = data.get('password')
-# Check if the username/email and password are provided
-        if not username_or_email or not password:
-            return {"error": "Credentials and password required"}, 400
 
-        user = User.query.filter(
-            (User.username == username_or_email) | (User.email == username_or_email)
-        ).first()
-# Check if the user exists and the password is correct
+        if not email or not password:
+            return {"error": "Email and password are required"}, 400
+
+        user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            return {"error": "Invalid username or password"}, 401
+            return {"error": "Invalid credentials"}, 401
 
-        access_token = create_access_token(identity=str(user.id))
-        return {
-            "access_token": access_token,
-            "user": user.to_dict()
-        }, 200
+        access_token = create_access_token(identity=user.id)
+        return {"access_token": access_token}, 200
 
-# Resource for retrieving the current user's information
 class MeResource(Resource):
     @jwt_required()
     def get(self):
         current_user_id = int(get_jwt_identity())
         user = User.query.get(current_user_id)
+
         if not user:
             return {"error": "User not found"}, 404
+
         return user.to_dict(), 200

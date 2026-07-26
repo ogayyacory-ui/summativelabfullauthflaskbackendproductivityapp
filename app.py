@@ -2,8 +2,8 @@ from flask import Flask
 from flask_restful import Api
 from config import Config
 from extensions import db, bcrypt, migrate, jwt, cors
-from routes.auth import RegisterResource, LoginResource, MeResource
-from routes.note import NoteListResource, NoteDetailResource
+from route.auth import RegisterResource, LoginResource, MeResource
+from route.note import NoteListResource, NoteDetailResource
 
 def create_app():
     app = Flask(__name__)
