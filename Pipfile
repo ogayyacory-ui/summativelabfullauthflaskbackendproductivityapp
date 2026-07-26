@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+Flask = "*"
+Flask-SQLAlchemy = "*"
+Flask-Bcrypt = "*"
+Flask-Migrate = "*"
+Flask-RESTful = "*"
+Flask-JWT-Extended = "*"
+Flask-CORS = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
