@@ -23,17 +23,17 @@ with app.app_context():
     # kamau's notes
     for i in range(1, 15):
         db.session.add(Note(
-            title=f"Alice's Note #{i}",
-            content=f"Content for Alice's note {i}.",
+            title=f"Kamau's Note #{i}",
+            content=f"Content for Kamau's note {i}.",
             user_id=kamau.id
         ))
 
-    # Bob's note
+    # kiprotich's note
     db.session.add(Note(
-        title="Bob's Secret Note",
-        content="This is private to Bob.",
+        title="Kiprotich's Secret Note",
+        content="This is private to Kiprotich.",
         user_id=kiprotich.id
     ))
 
     db.session.commit()
-    print("Seeding complete! Log in as alice@example.com or bob@example.com.")
+    print("Seeding complete! Log in as kamau@example.com or kiprotich@example.com.")
