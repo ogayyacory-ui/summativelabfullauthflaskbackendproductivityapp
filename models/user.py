@@ -2,6 +2,7 @@ from extensions import db, bcrypt
 
 # User model for the database
 class User(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)

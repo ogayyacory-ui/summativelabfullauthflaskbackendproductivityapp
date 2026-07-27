@@ -10,29 +10,29 @@ with app.app_context():
     db.create_all()
 
     print("Seeding users...")
-    user1 = User(username="alice", email="alice@example.com")
-    user1.set_password("password123")
+    kamau = User(username="Kamau", email="kamau@example.com")
+    kamau.set_password("87mau")
 
-    user2 = User(username="bob", email="bob@example.com")
-    user2.set_password("password123")
+    kiprotich = User(username="kiprotich", email="kiprotich@example.com")
+    kiprotich.set_password("kip2027")
 
-    db.session.add_all([user1, user2])
+    db.session.add_all([kamau, kiprotich])
     db.session.commit()
 
     print("Seeding notes...")
-    # Alice's notes
+    # kamau's notes
     for i in range(1, 15):
         db.session.add(Note(
             title=f"Alice's Note #{i}",
             content=f"Content for Alice's note {i}.",
-            user_id=user1.id
+            user_id=kamau.id
         ))
 
     # Bob's note
     db.session.add(Note(
         title="Bob's Secret Note",
         content="This is private to Bob.",
-        user_id=user2.id
+        user_id=kiprotich.id
     ))
 
     db.session.commit()

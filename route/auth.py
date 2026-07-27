@@ -21,7 +21,9 @@ class RegisterResource(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return user.to_dict(), 201
+        return user.to_dict(), 
+
+
 
 class LoginResource(Resource):
     def post(self):
