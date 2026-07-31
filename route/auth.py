@@ -1,6 +1,6 @@
-from flask import request
+from flask import request, make_response
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from extensions import db
 from models.user import User
 
@@ -21,7 +21,7 @@ class RegisterResource(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return user.to_dict(), 
+        return user.to_dict(), 201
 
 
 
@@ -39,7 +39,16 @@ class LoginResource(Resource):
             return {"error": "Invalid credentials"}, 401
 
         access_token = create_access_token(identity=user.id)
-        return {"access_token": access_token}, 200
+        response = make_response({"access_token": access_token}, 200)
+        set_access_cookies(response, access_token)
+        return response
+
+class LogoutResource(Resource):
+    @jwt_required(optional=True)
+    def post(self):
+        response = make_response({"message": "Logout successful"}, 200)
+        unset_jwt_cookies(response)
+        return response
 
 class MeResource(Resource):
     @jwt_required()

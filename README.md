@@ -66,8 +66,12 @@ pipenv run python app.py
 
 - `GET /me`
   - Retrieve the currently authenticated user.
-  - Requires `Authorization: Bearer <token>` header.
+  - Requires `Authorization: Bearer <token>` header or authenticated JWT cookie.
   - Response: user object with `id`, `username`, and `email`
+
+- `POST /logout`
+  - Log out the current user and clear JWT cookies.
+  - Response: success message.
 
 - `GET /notes`
   - List notes for the authenticated user.
